@@ -20,7 +20,9 @@ public class LicenseServiceController {
     public License getLicenses(@PathVariable("organizationId") String organizationId,
                                @PathVariable("licenseId") String licenseId) {
         return new License()
-                .withId(licenseId).withOrganizationId(organizationId)
-                .withLicenseType("Seat").withProductName("Teleco");
+                .withId(licenseId)
+                .withOrganizationId(organizationId)
+                .withLicenseType("Seat")
+                .withProductName("Teleco");
     }
 }

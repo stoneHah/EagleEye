@@ -1,6 +1,6 @@
 spring:
   application:
-    name: licensingservice
+    name: organizationservice
 eureka:
   instance:
     prefer-ip-address: true
@@ -10,4 +10,4 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 server:
-  port: 8001
+  port: 8100

@@ -7,7 +7,9 @@
 	<artifactId>eagleeye</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
     <modules>
+        <module>eurekasvr</module>
         <module>licensing-service</module>
+        <module>organizationa-service</module>
     </modules>
     <packaging>pom</packaging>
 
