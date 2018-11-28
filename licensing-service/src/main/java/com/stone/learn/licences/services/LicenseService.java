@@ -1,5 +1,8 @@
 package com.stone.learn.licences.services;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import com.netflix.hystrix.contrib.javanica.conf.HystrixPropertiesManager;
 import com.stone.learn.licences.clients.OrganizationDiscoveryClient;
 import com.stone.learn.licences.clients.OrganizationFeignClient;
 import com.stone.learn.licences.clients.OrganizationRestTemplateClient;
@@ -7,9 +10,11 @@ import com.stone.learn.licences.config.ServiceConfig;
 import com.stone.learn.licences.model.License;
 import com.stone.learn.licences.model.Organization;
 import com.stone.learn.licences.repository.LicenseRepository;
+import com.stone.learn.licences.utils.SleepUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +64,8 @@ public class LicenseService {
     public License getLicense(String organizationId, String licenseId, String clientType) {
         License license = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
 
-        Organization org = retrieveOrgInfo(organizationId, clientType);
+//        Organization org = retrieveOrgInfo(organizationId, clientType);
+        Organization org = getOrganization(organizationId);
 
         return license
                 .withOrganizationName( org.getName())
@@ -69,8 +75,36 @@ public class LicenseService {
                 .withComment(config.getExampleProperty());
     }
 
-    public List<License> getLicensesByOrg(String organizationId){
-        return licenseRepository.findByOrganizationId( organizationId );
+    @HystrixCommand
+    private Organization getOrganization(String organizationId) {
+        return organizationRestClient.getOrganization(organizationId);
+    }
+
+    /**
+     * 延长执行时间貌似没有执行
+     * @param organizationId
+     * @return
+     */
+    @HystrixCommand(commandProperties = {
+//            @HystrixProperty(name = HystrixPropertiesManager.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS, value="2200")
+    },fallbackMethod = "buildFallbackLicenseList",
+    threadPoolKey = "licenseByOrgThreadPool",
+    threadPoolProperties = {
+            @HystrixProperty(name = HystrixPropertiesManager.CORE_SIZE,value = "30"),
+            @HystrixProperty(name = HystrixPropertiesManager.MAX_QUEUE_SIZE,value = "10")
+    })
+    public List<License> getLicensesByOrg(String organizationId) {
+
+        SleepUtils.randomSleep(2);
+
+        return licenseRepository.findByOrganizationId(organizationId);
+    }
+
+    public List<License> buildFallbackLicenseList(String organizationId) {
+        return Collections.singletonList(new License()
+        .withId("000000-00-00000")
+        .withOrganizationId(organizationId)
+        .withProductName("Sorry no licensing information currently avalible"));
     }
 
     public void saveLicense(License license){

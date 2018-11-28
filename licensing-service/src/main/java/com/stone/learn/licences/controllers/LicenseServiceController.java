@@ -5,6 +5,8 @@ import com.stone.learn.licences.services.LicenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * ${DESCRIPTION}
  *
@@ -19,7 +21,7 @@ public class LicenseServiceController {
     private LicenseService licenseService;
 
     @GetMapping("/{licenseId}")
-    public License getLicenses(@PathVariable("organizationId") String organizationId,
+    public License getLicense(@PathVariable("organizationId") String organizationId,
                                @PathVariable("licenseId") String licenseId) {
         return new License()
                 .withId(licenseId)
@@ -34,5 +36,10 @@ public class LicenseServiceController {
                                           @PathVariable("clientType") String clientType) {
 
         return licenseService.getLicense(organizationId,licenseId, clientType);
+    }
+
+    @GetMapping("")
+    public List<License> getLicenses(@PathVariable("organizationId") String organizationId) {
+        return licenseService.getLicensesByOrg(organizationId);
     }
 }
