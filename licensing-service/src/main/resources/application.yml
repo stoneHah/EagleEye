@@ -15,3 +15,8 @@ eureka:
 server:
   port: 8001
 example.property: "I AM THE DEFAULT"
+logging:
+  level:
+    com.netflix: warn
+    com.springframework.web: warn
+    com.stone.learn: debug

@@ -10,7 +10,10 @@ import com.stone.learn.licences.config.ServiceConfig;
 import com.stone.learn.licences.model.License;
 import com.stone.learn.licences.model.Organization;
 import com.stone.learn.licences.repository.LicenseRepository;
+import com.stone.learn.licences.support.context.UserContextHolder;
 import com.stone.learn.licences.utils.SleepUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,8 @@ import java.util.UUID;
 
 @Service
 public class LicenseService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LicenseService.class);
 
     @Autowired
     private LicenseRepository licenseRepository;
@@ -86,7 +91,12 @@ public class LicenseService {
      * @return
      */
     @HystrixCommand(commandProperties = {
-//            @HystrixProperty(name = HystrixPropertiesManager.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS, value="2200")
+            @HystrixProperty(name = HystrixPropertiesManager.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS, value="1500"),
+            @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_REQUEST_VOLUME_THRESHOLD, value="10"),
+            @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_ERROR_THRESHOLD_PERCENTAGE, value="75"),
+            @HystrixProperty(name = HystrixPropertiesManager.CIRCUIT_BREAKER_SLEEP_WINDOW_IN_MILLISECONDS, value="7000"),
+            @HystrixProperty(name = HystrixPropertiesManager.METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS, value="15000"),
+            @HystrixProperty(name = HystrixPropertiesManager.METRICS_ROLLING_STATS_NUM_BUCKETS, value="3")
     },fallbackMethod = "buildFallbackLicenseList",
     threadPoolKey = "licenseByOrgThreadPool",
     threadPoolProperties = {
@@ -94,7 +104,7 @@ public class LicenseService {
             @HystrixProperty(name = HystrixPropertiesManager.MAX_QUEUE_SIZE,value = "10")
     })
     public List<License> getLicensesByOrg(String organizationId) {
-
+        logger.debug("LicenseService.getLicensesByOrg  Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
         SleepUtils.randomSleep(2);
 
         return licenseRepository.findByOrganizationId(organizationId);

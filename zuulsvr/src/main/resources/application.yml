@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: zuulservice
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    com.netflix: warn
+    com.springframework.web: warn
+    com.stone.learn: debug
+server:
+  port: 8201
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+zuul:
+  routes:
+    licensingservice: /licensesvr/**
+    licensestatic:
+      path: /licensestatic/**
+      url: http://localhost:8001
+  ignored-services: licensingservice
+  prefix: /api
+
