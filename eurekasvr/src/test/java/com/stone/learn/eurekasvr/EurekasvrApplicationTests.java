@@ -11,6 +11,7 @@ public class EurekasvrApplicationTests {
 
 	@Test
 	public void contextLoads() {
+//		String.class.na
 	}
 
 }

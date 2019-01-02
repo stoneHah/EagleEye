@@ -31,4 +31,7 @@ zuul:
       url: http://localhost:8001
   ignored-services: licensingservice
   prefix: /api
+hello:
+  name: zhengqun
+
 
